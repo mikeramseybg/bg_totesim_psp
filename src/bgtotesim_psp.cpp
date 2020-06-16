@@ -6,27 +6,66 @@
 
 #include "bgtotesim_psp.h"
 
-#include <actionlib/client/simple_action_client.h>
-#include <actionlib/client/terminal_state.h>
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <ros/ros.h>
-#include <sstream>
-#include <vector>
 
-#include <cv_bridge/cv_bridge.h>
+#include <bg_rpc/bind.hpp>
+#include <bg_rpc/grpc/sync_stub.hpp>
+#include <bg_rpc/sync_client_method.hpp>
+#include <bg_rpc/server_interface.hpp>
+#include <bg_rpc/sync_server.hpp>
+//#include <hyper_scanner/proto/parcel_event.grpc.pb.h>
 
-#include <common_msgs/SoftwareTriggerAction.h>
+using namespace bg::comms::rpc;
 
 
 
+// =============================================================================
+bool PSPNode::initialize()
+{
+    printf("PSPNode::initialize \n");
+
+    // Local nodehandle
+    ros::NodeHandle nh;
+
+    // create simple action server to use for "software trigger"
+    m_triggerServer.reset(new TriggerActionServerT(
+        nh, TRIGGER_NAME,
+        boost::bind(&PSPNode::triggerCallback, this, _1),
+        false));
+    m_triggerServer->start();
+    ros::spin();
+  
+}
+// =============================================================================
+void PSPNode::triggerCallback(const common_msgs::SoftwareTriggerGoalConstPtr& /*goal*/)
+{
+      
+    printf(" --- triggerCallback\n");
+    printf("dog\n");
+    m_ok = false;
+}
+// =============================================================================
 int main(int argc, char **argv) 
 {
-  ros::init(argc, argv, "psp");
-  ros::NodeHandle nh("");
-  ros::NodeHandle nh_local("~");
+    printf("====================================================================\n");
+    printf("                 BGToteSim Primary Scanner Proxy (PSP)\n");
+    printf("====================================================================\n");
+
+    ros::init(argc, argv, "psp");
+    // PSPnode goes into it's own thread
+    PSPNode psp_node;
+    psp_node.initialize();
+
+    printf("==");
+
+    // ros::Rate spin_rate(30.0f);
+    while(psp_node.ok())
+    {
+        // ros::spinOnce();
+        // spin_rate.sleep();
+        printf(".");
+    }
+
+    printf("hi");
 }
+
+// =============================================================================

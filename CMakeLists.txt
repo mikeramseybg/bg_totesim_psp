@@ -3,7 +3,12 @@ project(bgtotesim_psp)
 add_definitions(-DPROGRAM_NAME="bgtotesim_psp")
 set(CMAKE_CXX_STANDARD 17)
 
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+find_package(catkin REQUIRED)
 find_package(OpenCV REQUIRED)
+
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARIES})
 
@@ -45,6 +50,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   common_msgs
   perception_msgs
+  bg_rpc
 )
 
 ###########
